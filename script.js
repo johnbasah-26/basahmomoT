@@ -31,9 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
         transactions.mtn.push({
             date: now.toISOString().split('T')[0],
             time: now.toTimeString().substring(0, 5),
-            amount: 150, 
+            amount: , 
             type: 'deposit', 
-            phone: '024****123',
+            phone: '',
             recipient: '',
             network: 'mtn'
         });
@@ -380,3 +380,4 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('mm-transactions', JSON.stringify(transactions));
     }
 });
+
