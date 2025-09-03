@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', function() {
             time: now.toTimeString().substring(0, 5),
             amount: 0, 
             type: 'deposit', 
-            phone: '',
-            recipient: '0546643185',
+            phone: '0546643185',
+            recipient: '',
             network: 'mtn'
         });
         saveToLocalStorage();
@@ -380,5 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('mm-transactions', JSON.stringify(transactions));
     }
 });
+
 
 
