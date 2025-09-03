@@ -1,379 +1,114 @@
-<!DOCTYPE html>
+                            <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOCH Engineering | Construction With Integrity</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Mobile Money Tracker</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="light-mode">
-    <!-- Header & Navigation -->
-    <header>
-        <div class="container">
-            <nav>
-                <a href="#" class="logo">
-                    <img src="https://via.placeholder.com/50x50" alt="LOCH Engineering Logo" class="logo-img">
-                    <span>LOCH Eng. Ltd</span>
-                </a>
-                <ul class="nav-links">
-                    <li><a href="#home" class="nav-link active">Home</a></li>
-                    <li><a href="#services" class="nav-link">Services</a></li>
-                    <li><a href="#projects" class="nav-link">Projects</a></li>
-                    <li><a href="#about" class="nav-link">About</a></li>
-                    <li><a href="#contact" class="nav-link">Contact</a></li>
-                    <li>
-                        <button id="themeToggle" class="theme-toggle">
-                            <i class="fas fa-moon"></i>
-                        </button>
-                    </li>
-                </ul>
-                <div class="mobile-menu">
-                    <i class="fas fa-bars"></i>
-                </div>
-            </nav>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-wallet"></i> Mobile Money Transaction Tracker</h1>
+        
+        <div class="network-selector">
+            <button class="active" data-network="mtn">
+                <img src="data:image/png;base64,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" alt="MTN">
+                <span>MTN MoMo</span>
+            </button>
+            <button data-network="airtel">
+                <img src="data:image/jpeg;base64,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" alt="AirtelTigo">
+                <span>AT Money</span>
+            </button>
+            <button data-network="vodafone">
+                <img src="data:image/png;base64,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" alt="Vodafone">
+                <span>TeleCash</span>
+            </button>
         </div>
-    </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Construction With <span>Integrity</span></h1>
-                <p>Building affordable housing solutions while connecting tenants with quality landlords</p>
-                <div class="btn-container">
-                    <a href="#contact" class="btn">Get a Quote</a>
-                    <a href="#services" class="btn btn-outline">Our Services</a>
-                </div>
+        <div class="time-range-selector">
+            <select id="timeRange">
+                <option value="7days">Last 7 Days</option>
+                <option value="30days">Last 30 Days</option>
+                <option value="today">Today</option>
+                <option value="custom">Custom Range</option>
+            </select>
+            <div id="timeDisplay" class="time-display">
+                <span id="currentTime"></span>
             </div>
-            <img src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Modern Building" class="hero-image">
         </div>
-    </section>
 
-    <!-- Services Section -->
-    <section id="services" class="services">
-        <div class="container">
-            <h2 class="section-title">Our Services</h2>
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-calculator"></i>
-                    </div>
-                    <h3>Cost Estimates</h3>
-                    <p>Accurate project cost estimation for both government and private contracts with detailed breakdowns.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-drafting-compass"></i>
-                    </div>
-                    <h3>Architectural Drawings</h3>
-                    <p>Professional 2D and 3D architectural designs tailored to your project requirements.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-hard-hat"></i>
-                    </div>
-                    <h3>Project Supervision</h3>
-                    <p>Complete project management from groundbreaking to final handover.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <h3>Property Management</h3>
-                    <p>Comprehensive landlord services and tenant placement for optimal occupancy.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <h3>Affordable Housing</h3>
-                    <p>Cost-effective construction solutions to make housing accessible for everyone.</p>
-                </div>
-                <div class="service-card">
-                    <div class="service-icon">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <h3>Government Contracts</h3>
-                    <p>Specialized services for public sector construction projects and infrastructure.</p>
-                </div>
-            </div>
+        <div class="chart-container">
+            <canvas id="transactionChart"></canvas>
         </div>
-    </section>
 
-    <!-- Projects Section -->
-    <section id="projects" class="projects">
-        <div class="container">
-            <h2 class="section-title">Our Projects</h2>
-            <div class="projects-filter">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="residential">Residential</button>
-                <button class="filter-btn" data-filter="commercial">Commercial</button>
-                <button class="filter-btn" data-filter="government">Government</button>
-            </div>
-            <div class="projects-grid">
-                <div class="project-item" data-category="residential">
-                    <img src="https://images.unsplash.com/photo-1600585152220-90363fe7e115?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Residential Project" class="project-img">
-                    <div class="project-overlay">
-                        <h3>Affordable Housing Complex</h3>
-                        <p>200-unit residential development completed in 2022</p>
-                        <a href="#" class="btn">View Details</a>
-                    </div>
-                </div>
-                <div class="project-item" data-category="commercial">
-                    <img src="https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Commercial Project" class="project-img">
-                    <div class="project-overlay">
-                        <h3>Commercial Office Tower</h3>
-                        <p>15-story mixed-use development in downtown</p>
-                        <a href="#" class="btn">View Details</a>
-                    </div>
-                </div>
-                <div class="project-item" data-category="government">
-                    <img src="https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1610&q=80" alt="Government Project" class="project-img">
-                    <div class="project-overlay">
-                        <h3>Municipal Infrastructure</h3>
-                        <p>Road and drainage system for local government</p>
-                        <a href="#" class="btn">View Details</a>
-                    </div>
-                </div>
-                <div class="project-item" data-category="residential">
-                    <img src="https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Residential Project" class="project-img">
-                    <div class="project-overlay">
-                        <h3>Suburban Housing Estate</h3>
-                        <p>50 luxury homes with community amenities</p>
-                        <a href="#" class="btn">View Details</a>
-                    </div>
-                </div>
-                <div class="project-item" data-category="commercial">
-                    <img src="https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" alt="Commercial Project" class="project-img">
-                    <div class="project-overlay">
-                        <h3>Retail Complex</h3>
-                        <p>Shopping mall with 100+ retail spaces</p>
-                        <a href="#" class="btn">View Details</a>
-                    </div>
-                </div>
-                <div class="project-item" data-category="government">
-                    <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1544&q=80" alt="Government Project" class="project-img">
-                    <div class="project-overlay">
-                        <h3>Public Housing Project</h3>
-                        <p>300-unit affordable housing for government initiative</p>
-                        <a href="#" class="btn">View Details</a>
-                    </div>
-                </div>
-            </div>
+        <div class="controls">
+            <button id="pdfBtn" class="glow-button">
+                <i class="fas fa-file-pdf"></i> Download Statement
+            </button>
         </div>
-    </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
-        <div class="container">
-            <h2 class="section-title">About LOCH Engineering</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <div class="mission-vision">
-                        <div class="mv-card">
-                            <h3><i class="fas fa-bullseye"></i> Our Mission</h3>
-                            <p>To ensure total quality management, ensuring value for money for our clients as well as applying modern technologies in service delivery; Ensuring energy efficient and environmentally friendly designs</p>
-                        </div>
-                        <div class="mv-card">
-                            <h3><i class="fas fa-eye"></i> Our Vision</h3>
-                            <p>To be the lead sustainable building consultancy and construction provider in the World</p>
-                        </div>
-                    </div>
-                    <div class="values">
-                        <h3><i class="fas fa-star"></i> Core Values</h3>
-                        <ul>
-                            <li><strong>Integrity:</strong> Honesty and transparency in all our dealings</li>
-                            <li><strong>Quality:</strong> Uncompromising standards in construction</li>
-                            <li><strong>Innovation:</strong> Continuous improvement in techniques and materials</li>
-                            <li><strong>Affordability:</strong> Making housing accessible to all income levels</li>
-                            <li><strong>Sustainability:</strong> Environmentally responsible construction</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="about-image">
-                    <img src="https://images.unsplash.com/photo-1600607688969-a5bfcd646154?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Construction Team">
-                </div>
-            </div>
+        <div class="transaction-list">
+            <h3><i class="fas fa-list"></i> Recent Transactions</h3>
+            <div id="transactions"></div>
         </div>
-    </section>
 
-    <!-- Testimonials Section -->
-    <section class="testimonials">
-        <div class="container">
-            <h2 class="section-title">Client Testimonials</h2>
-            <div class="testimonials-slider">
-                <div class="testimonial active">
-                    <div class="testimonial-content">
-                        <p>"LOCH Engineering delivered our government housing project on time and under budget. Their attention to detail and project management skills are exceptional."</p>
-                        <div class="client-info">
-                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Client">
-                            <div>
-                                <h4>Kwame Osei</h4>
-                                <span>Ministry of Housing</span>
-                            </div>
-                        </div>
+        <div class="form-container slide-up">
+            <h3><i class="fas fa-plus-circle"></i> Add Transaction</h3>
+            <form id="transactionForm">
+                <div class="form-group">
+                    <select id="txnType" required>
+                        <option value="">-- Transaction Type --</option>
+                        <option value="deposit">Deposit</option>
+                        <option value="withdrawal">Withdrawal</option>
+                        <option value="airtime">Airtime</option>
+                        <option value="transfer">Transfer</option>
+                        <option value="payment">Payment</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <input type="number" id="amount" placeholder="Amount (GHS)" required step="0.01" min="0.01">
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" id="phoneNumber" placeholder="Client's Phone Number" required>
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" id="recipient" placeholder="Recipient Number (for transfers)" style="display: none;">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="date" id="txnDate" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="time" id="txnTime" required>
                     </div>
                 </div>
-                <div class="testimonial">
-                    <div class="testimonial-content">
-                        <p>"As a landlord, LOCH has helped me manage my properties efficiently and find quality tenants. Their maintenance team is responsive and professional."</p>
-                        <div class="client-info">
-                            <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Client">
-                            <div>
-                                <h4>Ama Serwaa</h4>
-                                <span>Property Owner</span>
-                            </div>
-                        </div>
-                    </div>
+                
+                <div class="form-group">
+                    <select id="network" required>
+                        <option value="mtn">MTN MoMo</option>
+                        <option value="airtel">AirtelTigo Money</option>
+                        <option value="vodafone">Vodafone Cash</option>
+                    </select>
                 </div>
-                <div class="testimonial">
-                    <div class="testimonial-content">
-                        <p>"The cost estimates provided by LOCH were incredibly accurate, helping us secure financing for our commercial development. Highly recommended!"</p>
-                        <div class="client-info">
-                            <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Client">
-                            <div>
-                                <h4>Yaw Mensah</h4>
-                                <span>CEO, Urban Developments</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="slider-controls">
-                    <button class="slider-prev"><i class="fas fa-chevron-left"></i></button>
-                    <button class="slider-next"><i class="fas fa-chevron-right"></i></button>
-                </div>
-            </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-save"></i> Save Transaction
+                </button>
+            </form>
         </div>
-    </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <h2 class="section-title">Contact Us</h2>
-            <div class="contact-container">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="contact-text">
-                            <h3>Headquarters</h3>
-                            <p>Mile 9, Yilonaayili,  Tamale, Ghana</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="contact-text">
-                            <h3>Email</h3>
-                            <p>info@lochengineering.com</p>
-                            <p>louchengineering4@gmail.com</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div class="contact-text">
-                            <h3>Phone</h3>
-                            <p>+233 50 436 1474(Office)</p>
-                            <p>+233 55 883 8711(Projects)</p>
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="contact-text">
-                            <h3>Working Hours</h3>
-                            <p>Mon-Fri: 8:00 AM - 5:00 PM</p>
-                            <p>Sat: 9:00 AM - 1:00 PM</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="contact-form">
-                    <form id="contactForm">
-                        <div class="form-group">
-                            <input type="text" class="form-control" placeholder="Your Name" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" class="form-control" placeholder="Your Email" required>
-                        </div>
-                        <div class="form-group">
-                            <select class="form-control" required>
-                                <option value="">Select Service</option>
-                                <option>Cost Estimates</option>
-                                <option>Architectural Drawings</option>
-                                <option>Project Supervision</option>
-                                <option>Property Management</option>
-                                <option>Government Contracts</option>
-                                <option>Other Inquiry</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <textarea class="form-control" placeholder="Your Message" required></textarea>
-                        </div>
-                        <button type="submit" class="btn">Send Message</button>
-                    </form>
-                </div>
-            </div>
+        <div class="footer">
+            <p>© 2025 Mobile Money Tracker |Hudson |HuBB Tech</p>
         </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-col">
-                    <h3>LOCH Engineering</h3>
-                    <p>Construction With Integrity. Making housing affordable while connecting tenants with quality landlords.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                <div class="footer-col">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#projects">Projects</a></li>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Services</h3>
-                    <ul>
-                        <li><a href="#">Cost Estimates</a></li>
-                        <li><a href="#">Architectural Drawings</a></li>
-                        <li><a href="#">Project Supervision</a></li>
-                        <li><a href="#">Property Management</a></li>
-                        <li><a href="#">Government Contracts</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Newsletter</h3>
-                    <p>Subscribe to our newsletter for project updates and construction insights.</p>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="Your Email" required>
-                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p class="copyright">© 2023 LOCH Engineering. All Rights Reserved.</p>
-                <div class="footer-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>
