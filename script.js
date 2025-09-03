@@ -1,296 +1,382 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Theme Toggle Functionality
-    const themeToggle = document.getElementById('themeToggle');
-    const body = document.body;
+    const { jsPDF } = window.jspdf;
+    const ctx = document.getElementById('transactionChart').getContext('2d');
+    let transactionChart;
     
-    // Check for saved theme preference or default to dark
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    body.classList.add(savedTheme);
-    updateThemeIcon(savedTheme);
-    
-    themeToggle.addEventListener('click', function() {
-        if (body.classList.contains('dark')) {
-            body.classList.replace('dark', 'light');
-            localStorage.setItem('theme', 'light');
-        } else {
-            body.classList.replace('light', 'dark');
-            localStorage.setItem('theme', 'dark');
-        }
-        updateThemeIcon();
-    });
-    
-    function updateThemeIcon() {
-        const icon = themeToggle.querySelector('i');
-        if (body.classList.contains('light')) {
-            icon.classList.replace('fa-moon', 'fa-sun');
-            icon.style.color = '#ff7b25'; // Orange color for sun icon
-        } else {
-            icon.classList.replace('fa-sun', 'fa-moon');
-            icon.style.color = '#ff7b25'; // Orange color for moon icon
-        }
+    // Initialize transactions with time tracking
+    let transactions = JSON.parse(localStorage.getItem('mm-transactions')) || {
+        mtn: [],
+        airtel: [],
+        vodafone: []
+    };
+
+    // Update current time display
+    function updateCurrentTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-GH', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        document.getElementById('currentTime').textContent = timeString;
     }
     
-    // Mobile Menu Toggle
-    const mobileMenu = document.querySelector('.mobile-menu');
-    const navLinks = document.querySelector('.nav-links');
-    
-    mobileMenu.addEventListener('click', function() {
-        navLinks.classList.toggle('active');
-        mobileMenu.innerHTML = navLinks.classList.contains('active') ? 
-            '<i class="fas fa-times" style="color:#ff7b25"></i>' : 
-            '<i class="fas fa-bars" style="color:#ff7b25"></i>';
-    });
-    
-    // Close mobile menu when clicking a nav link
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function() {
-            if (navLinks.classList.contains('active')) {
-                navLinks.classList.remove('active');
-                mobileMenu.innerHTML = '<i class="fas fa-bars" style="color:#ff7b25"></i>';
-            }
+    // Set up time updates
+    updateCurrentTime();
+    setInterval(updateCurrentTime, 1000);
+
+    // Initialize with sample data if empty
+    if (transactions.mtn.length === 0) {
+        const now = new Date();
+        transactions.mtn.push({
+            date: now.toISOString().split('T')[0],
+            time: now.toTimeString().substring(0, 5),
+            amount: 150, 
+            type: 'deposit', 
+            phone: '024****123',
+            recipient: '',
+            network: 'mtn'
         });
+        saveToLocalStorage();
+    }
+
+    // DOM Elements
+    const txnTypeSelect = document.getElementById('txnType');
+    const recipientField = document.getElementById('recipient');
+    const timeRangeSelect = document.getElementById('timeRange');
+
+    // Event Listeners
+    txnTypeSelect.addEventListener('change', function() {
+        recipientField.style.display = this.value === 'transfer' ? 'block' : 'none';
     });
+
+    document.getElementById('transactionForm').addEventListener('submit', addManualTransaction);
+    document.getElementById('pdfBtn').addEventListener('click', generatePDFStatement);
     
-    // Smooth Scrolling for Navigation Links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-            
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                window.scrollTo({
-                    top: targetElement.offsetTop - 70,
-                    behavior: 'smooth'
-                });
-                
-                // Update active nav link
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                });
-                this.classList.add('active');
-            }
-        });
-    });
-    
-    // Projects Filtering
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const projectItems = document.querySelectorAll('.project-item');
-    
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Update active filter button
-            filterButtons.forEach(btn => {
-                btn.classList.remove('active');
-                btn.style.backgroundColor = 'transparent';
-                btn.style.color = 'var(--text-primary)';
+    document.querySelectorAll('.network-selector button').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.network-selector button').forEach(b => {
+                b.classList.remove('active');
+                b.style.transform = 'translateY(0)';
+                b.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
             });
             
             this.classList.add('active');
-            this.style.backgroundColor = 'var(--primary)';
-            this.style.color = 'var(--dark)';
+            this.style.transform = 'translateY(-3px)';
+            this.style.boxShadow = '0 6px 12px rgba(106, 17, 203, 0.3)';
             
-            const filterValue = this.getAttribute('data-filter');
-            
-            // Filter project items with animation
-            projectItems.forEach(item => {
-                if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
-                    item.style.display = 'block';
-                    item.style.animation = 'fadeIn 0.5s ease-in-out';
-                } else {
-                    item.style.animation = 'fadeOut 0.3s ease-in-out';
-                    setTimeout(() => {
-                        item.style.display = 'none';
-                    }, 300);
+            const network = this.dataset.network;
+            renderChart(network);
+            renderTransactionList(network);
+        });
+    });
+
+    timeRangeSelect.addEventListener('change', function() {
+        const network = document.querySelector('.network-selector button.active').dataset.network;
+        renderChart(network);
+    });
+
+    // Initial render
+    renderChart('mtn');
+    renderTransactionList('mtn');
+
+    // Core Functions
+    function renderChart(network) {
+        const data = filterByDateRange(transactions[network]);
+        const grouped = groupTransactionsByDate(data);
+        const dates = Object.keys(grouped).sort();
+        
+        if (transactionChart) {
+            transactionChart.data.labels = dates;
+            transactionChart.data.datasets.forEach((dataset, i) => {
+                if (i === 0) dataset.data = dates.map(date => grouped[date].deposits || 0);
+                if (i === 1) dataset.data = dates.map(date => grouped[date].withdrawals || 0);
+                if (i === 2) dataset.data = dates.map(date => grouped[date].airtime || 0);
+                if (i === 3) dataset.data = dates.map(date => grouped[date].transfer || 0);
+                if (i === 4) dataset.data = dates.map(date => grouped[date].payment || 0);
+            });
+            transactionChart.update();
+        } else {
+            transactionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dates,
+                    datasets: [
+                        {
+                            label: 'Deposits',
+                            data: dates.map(date => grouped[date].deposits || 0),
+                            backgroundColor: '#00c853',
+                            borderRadius: 6,
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Withdrawals',
+                            data: dates.map(date => grouped[date].withdrawals || 0),
+                            backgroundColor: '#ff3d00',
+                            borderRadius: 6,
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Airtime',
+                            data: dates.map(date => grouped[date].airtime || 0),
+                            backgroundColor: '#ffab00',
+                            borderRadius: 6,
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Transfers',
+                            data: dates.map(date => grouped[date].transfer || 0),
+                            backgroundColor: '#6200ea',
+                            borderRadius: 6,
+                            borderSkipped: false
+                        },
+                        {
+                            label: 'Payments',
+                            data: dates.map(date => grouped[date].payment || 0),
+                            backgroundColor: '#0091ea',
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `${network.toUpperCase()} Transactions (GHS)`,
+                            color: '#ffffff',
+                            font: {
+                                size: 16,
+                                weight: '600'
+                            }
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#ffffff',
+                                font: {
+                                    size: 12
+                                },
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(30, 30, 30, 0.9)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#333',
+                            borderWidth: 1,
+                            padding: 12,
+                            usePointStyle: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#b0b0b0'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            ticks: {
+                                color: '#b0b0b0',
+                                callback: function(value) {
+                                    return 'GHS ' + value;
+                                }
+                            }
+                        }
+                    }
                 }
             });
-        });
-    });
-    
-    // Testimonials Slider
-    const testimonials = document.querySelectorAll('.testimonial');
-    const prevBtn = document.querySelector('.slider-prev');
-    const nextBtn = document.querySelector('.slider-next');
-    let currentTestimonial = 0;
-    let autoSlideInterval;
-    
-    function showTestimonial(index) {
-        testimonials.forEach((testimonial, i) => {
-            testimonial.classList.remove('active', 'fade-out');
-            if (i === index) {
-                testimonial.classList.add('active');
-                testimonial.style.animation = 'fadeIn 0.5s ease-in-out';
-            }
-        });
-        currentTestimonial = index;
+        }
     }
-    
-    function nextTestimonial() {
-        let newIndex = currentTestimonial + 1;
-        if (newIndex >= testimonials.length) newIndex = 0;
+
+    function renderTransactionList(network) {
+        const list = document.getElementById('transactions');
+        const data = filterByDateRange(transactions[network]);
         
-        // Add fade-out animation to current testimonial
-        testimonials[currentTestimonial].classList.add('fade-out');
+        list.innerHTML = data
+            .sort((a, b) => new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`))
+            .reverse()
+            .map(t => `
+                <div class="transaction">
+                    <div class="txn-details">
+                        <span class="txn-date">${formatDate(t.date)}</span>
+                        <span class="txn-time">${t.time}</span>
+                    </div>
+                    <span class="${t.type === 'deposit' ? 'credit' : 'debit'}">
+                        ${t.type === 'deposit' ? '+' : '-'}GHS${t.amount.toFixed(2)}
+                        ${t.recipient ? `→ ${t.recipient}` : ''}
+                    </span>
+                    <span class="txn-phone">${t.phone || ''}</span>
+                </div>
+            `).join('');
+    }
+
+    function addManualTransaction(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const network = document.getElementById('network').value;
+        const txnType = document.getElementById('txnType').value;
+        const now = new Date();
+        
+        const newTxn = {
+            date: document.getElementById('txnDate').value || now.toISOString().split('T')[0],
+            time: document.getElementById('txnTime').value || now.toTimeString().substring(0, 5),
+            amount: parseFloat(document.getElementById('amount').value),
+            type: txnType,
+            phone: document.getElementById('phoneNumber').value,
+            recipient: txnType === 'transfer' ? document.getElementById('recipient').value : '',
+            network: network
+        };
+        
+        // Add animation feedback
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+        submitBtn.style.backgroundColor = '#00c853';
         
         setTimeout(() => {
-            showTestimonial(newIndex);
-        }, 300);
-    }
-    
-    function prevTestimonial() {
-        let newIndex = currentTestimonial - 1;
-        if (newIndex < 0) newIndex = testimonials.length - 1;
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Save Transaction';
+            submitBtn.style.backgroundColor = '';
+        }, 1500);
         
-        testimonials[currentTestimonial].classList.add('fade-out');
+        transactions[network].push(newTxn);
+        saveToLocalStorage();
+        renderChart(network);
+        renderTransactionList(network);
+        form.reset();
+        recipientField.style.display = 'none';
+    }
+
+    function generatePDFStatement() {
+        const network = getCurrentNetwork();
+        const data = transactions[network].sort((a, b) => 
+            new Date(`${a.date}T${a.time}`) - new Date(`${b.date}T${b.time}`)
+        ).reverse();
         
-        setTimeout(() => {
-            showTestimonial(newIndex);
-        }, 300);
-    }
-    
-    prevBtn.addEventListener('click', function() {
-        clearInterval(autoSlideInterval);
-        prevTestimonial();
-        startAutoSlide();
-    });
-    
-    nextBtn.addEventListener('click', function() {
-        clearInterval(autoSlideInterval);
-        nextTestimonial();
-        startAutoSlide();
-    });
-    
-    function startAutoSlide() {
-        autoSlideInterval = setInterval(() => {
-            nextTestimonial();
-        }, 5000);
-    }
-    
-    // Start auto-sliding
-    startAutoSlide();
-    
-    // Pause auto-slide when hovering over testimonials
-    const testimonialContainer = document.querySelector('.testimonials-slider');
-    testimonialContainer.addEventListener('mouseenter', () => {
-        clearInterval(autoSlideInterval);
-    });
-    
-    testimonialContainer.addEventListener('mouseleave', startAutoSlide);
-    
-    // Form Submission
-    const contactForm = document.getElementById('contactForm');
-    
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form values
-            const formData = new FormData(this);
-            const formValues = Object.fromEntries(formData.entries());
-            
-            // Show loading state
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-            submitBtn.disabled = true;
-            
-            // Simulate form submission (replace with actual AJAX call)
-            setTimeout(() => {
-                // Show success message
-                const successMessage = document.createElement('div');
-                successMessage.className = 'form-success';
-                successMessage.innerHTML = `
-                    <i class="fas fa-check-circle" style="color:#ff7b25;font-size:2rem;margin-bottom:1rem;"></i>
-                    <h3>Thank you for your message!</h3>
-                    <p>We'll get back to you within 24 hours.</p>
-                `;
-                contactForm.parentNode.insertBefore(successMessage, contactForm);
-                contactForm.style.display = 'none';
-                
-                // Reset button state
-                submitBtn.innerHTML = originalBtnText;
-                submitBtn.disabled = false;
-                
-                // Remove success message after 5 seconds
-                setTimeout(() => {
-                    successMessage.remove();
-                    contactForm.style.display = 'block';
-                    contactForm.reset();
-                }, 5000);
-            }, 1500);
-        });
-    }
-    
-    // Scroll Spy for Navigation
-    window.addEventListener('scroll', function() {
-        const scrollPosition = window.scrollY;
+        const doc = new jsPDF();
         
-        // Check each section
-        document.querySelectorAll('section').forEach(section => {
-            const sectionTop = section.offsetTop - 100;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute('id');
-            
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === `#${sectionId}`) {
-                        link.classList.add('active');
-                        link.style.color = 'var(--primary)';
-                    }
-                });
+        // Header
+        doc.setFontSize(18);
+        doc.setTextColor('#6a11cb');
+        doc.text(`${network.toUpperCase()} Transaction Statement`, 105, 15, { align: 'center' });
+        
+        doc.setFontSize(12);
+        doc.setTextColor('#666');
+        doc.text(`Generated on: ${new Date().toLocaleDateString('en-GH')} at ${new Date().toLocaleTimeString('en-GH')}`, 105, 22, { align: 'center' });
+        
+        // Transaction Table
+        const headers = [["Date", "Time", "Type", "Amount (GHS)", "From", "To"]];
+        const txnData = data.map(t => [
+            formatDate(t.date),
+            t.time,
+            t.type.charAt(0).toUpperCase() + t.type.slice(1),
+            (t.type === 'deposit' ? '+' : '-') + t.amount.toFixed(2),
+            t.phone,
+            t.recipient || 'N/A'
+        ]);
+        
+        doc.autoTable({
+            head: headers,
+            body: txnData,
+            startY: 30,
+            styles: {
+                cellPadding: 5,
+                fontSize: 10,
+                valign: 'middle',
+                textColor: '#333'
+            },
+            columnStyles: {
+                0: { cellWidth: 25 },
+                1: { cellWidth: 20 },
+                2: { cellWidth: 25 },
+                3: { cellWidth: 25 },
+                4: { cellWidth: 'auto' },
+                5: { cellWidth: 'auto' }
+            },
+            headStyles: {
+                fillColor: '#6a11cb',
+                textColor: '#ffffff',
+                fontStyle: 'bold'
+            },
+            alternateRowStyles: {
+                fillColor: '#f5f5f5'
+            },
+            didDrawPage: function(data) {
+                doc.setFontSize(10);
+                doc.setTextColor('#999');
+                doc.text("© 2025 Mobile Money Tracker | Developed by Bannor Hudson Basah", 
+                    data.settings.margin.left, 
+                    doc.internal.pageSize.height - 10
+                );
             }
         });
-    });
-    
-    // Animation on Scroll
-    const animateOnScroll = function() {
-        const elements = document.querySelectorAll('.service-card, .project-item, .mv-card, .about-image');
         
-        elements.forEach(element => {
-            const elementPosition = element.getBoundingClientRect().top;
-            const screenPosition = window.innerHeight / 1.3;
+        // Save PDF
+        doc.save(`${network}_statement_${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+
+    // Helper Functions
+    function getCurrentNetwork() {
+        return document.querySelector('.network-selector button.active').dataset.network;
+    }
+
+    function filterByDateRange(txns) {
+        const range = document.getElementById('timeRange').value;
+        const now = new Date();
+        let cutoffDate = new Date();
+        
+        if (range === '7days') cutoffDate.setDate(now.getDate() - 7);
+        else if (range === '30days') cutoffDate.setDate(now.getDate() - 30);
+        else if (range === 'today') {
+            const today = now.toISOString().split('T')[0];
+            return txns.filter(t => t.date === today);
+        }
+        else return txns;
+        
+        return txns.filter(t => new Date(t.date) >= cutoffDate);
+    }
+
+    function groupTransactionsByDate(txns) {
+        return txns.reduce((acc, curr) => {
+            if (!acc[curr.date]) acc[curr.date] = { 
+                deposits: 0, 
+                withdrawals: 0, 
+                airtime: 0, 
+                transfer: 0,
+                payment: 0
+            };
             
-            if (elementPosition < screenPosition) {
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0)';
-                element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            }
-        });
-    };
-    
-    // Set initial state for animated elements
-    document.querySelectorAll('.service-card, .project-item, .mv-card, .about-image').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-    });
-    
-    // Run once on load
-    animateOnScroll();
-    
-    // Run on scroll
-    window.addEventListener('scroll', animateOnScroll);
-    
-    // Add CSS animations dynamically
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(20px); }
-        }
-        .form-success {
-            background: var(--secondary);
-            padding: 2rem;
-            border-radius: 10px;
-            text-align: center;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-    `;
-    document.head.appendChild(style);
+            if (curr.type === 'deposit') acc[curr.date].deposits += curr.amount;
+            else if (curr.type === 'withdrawal') acc[curr.date].withdrawals += curr.amount;
+            else if (curr.type === 'airtime') acc[curr.date].airtime += curr.amount;
+            else if (curr.type === 'transfer') acc[curr.date].transfer += curr.amount;
+            else if (curr.type === 'payment') acc[curr.date].payment += curr.amount;
+            
+            return acc;
+        }, {});
+    }
+
+    function formatDate(dateStr) {
+        const options = { day: 'numeric', month: 'short', year: 'numeric' };
+        return new Date(dateStr).toLocaleDateString('en-GH', options);
+    }
+
+    function saveToLocalStorage() {
+        localStorage.setItem('mm-transactions', JSON.stringify(transactions));
+    }
 });
