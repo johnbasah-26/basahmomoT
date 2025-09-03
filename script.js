@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', function() {
         transactions.mtn.push({
             date: now.toISOString().split('T')[0],
             time: now.toTimeString().substring(0, 5),
-            amount: , 
+            amount: 0, 
             type: 'deposit', 
             phone: '',
-            recipient: '',
+            recipient: '0546643185',
             network: 'mtn'
         });
         saveToLocalStorage();
@@ -380,4 +380,5 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('mm-transactions', JSON.stringify(transactions));
     }
 });
+
 
