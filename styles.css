@@ -24,6 +24,61 @@ body {
     min-height: 100vh;
     padding: 20px;
 }
+/* login and out starts */
+#loginOverlay {
+    position:fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: url('https://scontent.facc5-1.fna.fbcdn.net/v/t39.30808-6/482016931_628511766602934_4367663840695042096_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeGUrZPup-Vl2GePiZO51FrRNl8H6HAXK1w2XwfocBcrXKi7LFoWOcczR3LSzHqBBvYWAGewnbOEiaISn4eZMG5J&_nc_ohc=-1l4NCEhpMMQ7kNvwFLFy7t&_nc_oc=AdnLYUu10dA1K5L1tvCi7cF9T1Bog8lwyJQuQjWi4MPqamQns-Ihp5Yd--GHzHcdP6U&_nc_zt=23&_nc_ht=scontent.facc5-1.fna&_nc_gid=BXSbYf0dCuf8poamMwNCOg&oh=00_AfaPOGGITOY3wnYSMoldT4i57TdVPes6OzJA4exbuI6imQ&oe=68D45F05') no-repeat center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+#loginForm {
+    background: linear-gradient(to right, var(--accent), var(--secondary));
+    padding: 2em 2em 1em 2em;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #0002;
+    min-width: 450px;
+    min-height: 300px;
+    display: block;
+}
+
+#signupForm {
+    background: linear-gradient(to right, var(--accent), var(--secondary));
+    padding: 2em 2em 1em 2em;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #0002;
+    min-width: 450px;
+    min-height: 300px;
+    display: block;
+}
+
+#logoutBtn {
+    position: relative;
+    top: 1em;
+    right: 1em;
+    padding: 0.5em 1.5em;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(106, 17, 203, 0.4);
+    display: none; /* Hidden by default */
+}
+
+#logoutBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(106, 17, 203, 0.6);
+}
+
+/* login and out ends */
 
 .container {
     max-width: 800px;
@@ -126,7 +181,7 @@ h1 {
 /* Chart Container */
 .chart-container {
     background: var(--card-bg);
-    padding: 20px;
+    padding: 10px;
     border-radius: 15px;
     margin-bottom: 25px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
