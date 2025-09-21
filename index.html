@@ -24,32 +24,34 @@
             <input type="password" id="password" placeholder="Password" required style="width:100%;padding:0.5em; background: transparent; color: #fff; font-weight: 600;">
         </div>
         <button type="submit" style="width:100%;padding:0.7em;background: linear-gradient(135deg, var(--primary), var(--secondary));color:#fff;border:none;border-radius:4px;">Login</button>
-        <p id="loginError" style="color:red;text-align:center;display:none;margin-top:1em;">Invalid credentials</p>
+        <p id="loginError" style="color:red;text-align:center;display:none;margin-top:2em;">Invalid credentials</p>
     </form>
 
         <!-- signup form -->
     <form id="signupForm" style="display:none;">
-        <h2 style="text-align:center;">Sign Up</h2>
+        <h2 style="text-align:center; background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;">Sign Up</h2>
         <div style="margin-bottom:1em;">
-            <input type="text" id="signupUsername" placeholder="Choose Username" required style="width:100%;padding:0.5em; background: transparent; color: #fff; font-weight: 600;">
+            <input type="text" id="signupUsername" placeholder="choose a username" required style="width:100%;padding:0.5em; background: transparent; color: #fff; font-weight: 600;">
         </div>
         <div style="margin-bottom:1em;">
-            <input type="password" id="signupPassword" placeholder="Choose Password" required style="width:100%;padding:0.5em; background: transparent; color: #fff; font-weight: 600;">
+            <input type="password" id="signupPassword" placeholder="choose a password" required style="width:100%;padding:0.5em; background: transparent; color: #fff; font-weight: 600;">
         </div>
         <button type="submit" style="width:100%;padding:0.7em;background: linear-gradient(135deg, var(--primary), var(--secondary));color:#fff;border:none;border-radius:4px;">Sign Up</button>
         <p id="signupError" style="color:red;text-align:center;display:none;margin-top:1em;">Username already exists</p>
         <p style="text-align:center;margin-top:1em;">
-            <a href="#" id="showLogin">Already have an account? Login</a>
+            Already have an account?<a href="#" id="showLogin"> Login</a>
         </p>
     </form>
         <p id="signupLinkContainer" style="text-align:center;margin-top: 9.6em; position: absolute;">
-        <a href="#" id="showSignup">Don't have an account? Sign Up</a>
+        Don't have an account?<a href="#" id="showSignup">Sign Up</a>
     </p>
 
         <!-- Success Modal -->
     <div id="signupSuccessModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:10000; align-items:center; justify-content:center;">
         <div style="background:#fff; padding:2em 2em 1em 2em; border-radius:8px; box-shadow:0 2px 8px #0002; min-width:300px; text-align:center;">
-            <h3 style="color:green;">Sign up successful!</h3>
+            <h3 style="color:green;">Successful!</h3>
             <p>You can now log in with your new account.</p>
             <button id="closeSignupSuccess" style="margin-top:1em; padding:0.5em 2em; background:#007bff; color:#fff; border:none; border-radius:4px;">OK</button>
         </div>
@@ -97,7 +99,7 @@
                         <option value="withdrawal">Withdrawal</option>
                         <option value="airtime">Airtime</option>
                         <option value="transfer">Transfer</option>
-                        <option value="payment">Payment</option>
+                        <!-- <option value="payment">Payment</option> -->
                     </select>
                 </div>
                 
@@ -111,9 +113,9 @@
                     <datalist id="phoneSuggestions"></datalist>
                 </div>
                 
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <input type="text" id="recipient" placeholder="Recipient Number (for transfers)" style="display: none;">
-                </div>
+                </div> -->
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -123,73 +125,25 @@
                         <input type="time" id="txnTime" required>
                     </div>
                 </div>
+
+                <select id="txnNetwork">
+                    <option value="mtn">MTN</option>
+                    <option value="airtel">AirtelTigo</option>
+                    <option value="vodafone">Telecel</option>
+                </select>
                 
-                <input type="text" id="phoneNumber" placeholder="Phone Number">
-<select id="txnNetwork">
-    <option value="mtn">MTN</option>
-    <option value="airtel">AirtelTigo</option>
-    <option value="vodafone">Telecel</option>
-</select>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const phoneInput = document.getElementById('phoneNumber');
-    const networkSelect = document.getElementById('txnNetwork');
-    if (phoneInput && networkSelect) {
-        phoneInput.addEventListener('input', function() {
-            const phone = this.value.trim();
-            if (phone.length >= 3) {
-                const prefix = phone.substring(0, 3);
-                if (["054", "059", "024", "055"].includes(prefix)) {
-                    networkSelect.value = "mtn";
-                } else if (["050", "020"].includes(prefix)) {
-                    networkSelect.value = "vodafone";
-                } else if (["027", "026", "057", "056"].includes(prefix)) {
-                    networkSelect.value = "airtel";
-                }
-            }
-        });
-    }
-});
-</script>
-                
-                <button type="submit" class="submit-btn">
-                    <i class="fas fa-save"></i> Save Transaction
-                </button>
+        <button type="submit" class="submit-btn">
+                <i class="fas fa-save"></i> Save Transaction
+        </button>
             </form>
         </div>
 
-            <div class="transaction-list">
+        <div class="transaction-list">
             <h3><i class="fas fa-list"></i> Recent Transactions</h3>
             <div id="transactions"></div>
             <button id="deleteAllTxnsBtn" style="color:#fff; background:#0f23da; border:none; border-radius:4px; padding: 0.2em 1em; cursor:pointer">Delete All Transactions</button>
             <div id="transactions"></div>
-            <script>
-            function renderTransactions() {
-                const transactionsDiv = document.getElementById('transactions');
-                let allNetworks = JSON.parse(localStorage.getItem('mm-transactions')) || { mtn: [], airtel: [], vodafone: [] };
-                let transactions = [...allNetworks.mtn, ...allNetworks.airtel, ...allNetworks.vodafone];
-                transactionsDiv.innerHTML = '';
-                if (transactions.length === 0) {
-                    transactionsDiv.innerHTML = '<p>No transactions yet.</p>';
-                    return;
-                }
-                transactions.forEach(txn => {
-                    const div = document.createElement('div');
-                    div.textContent = `${txn.type} | GH₵${txn.amount} | ${txn.phone} | ${txn.clientName || txn.recipient || ''} | ${txn.date} ${txn.time} | ${txn.network}`;
-                    transactionsDiv.appendChild(div);
-                });
-            }
-            document.addEventListener('DOMContentLoaded', function() {
-                document.getElementById('deleteAllTxnsBtn').onclick = function() {
-                    if (confirm('Are you sure you want to delete all transactions?')) {
-                        localStorage.removeItem('mm-transactions');
-                        renderTransactions();
-                    }
-                };
-                renderTransactions();
-            });
-            </script>
-        </div>
+      </div>
         
         <div class="chart-container">
             <canvas id="transactionChart"></canvas>
