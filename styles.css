@@ -32,10 +32,10 @@ body {
     width: 100vw;
     height: 100vh;
     background: url('https://scontent.facc5-1.fna.fbcdn.net/v/t39.30808-6/482016931_628511766602934_4367663840695042096_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeGUrZPup-Vl2GePiZO51FrRNl8H6HAXK1w2XwfocBcrXKi7LFoWOcczR3LSzHqBBvYWAGewnbOEiaISn4eZMG5J&_nc_ohc=-1l4NCEhpMMQ7kNvwFLFy7t&_nc_oc=AdnLYUu10dA1K5L1tvCi7cF9T1Bog8lwyJQuQjWi4MPqamQns-Ihp5Yd--GHzHcdP6U&_nc_zt=23&_nc_ht=scontent.facc5-1.fna&_nc_gid=BXSbYf0dCuf8poamMwNCOg&oh=00_AfaPOGGITOY3wnYSMoldT4i57TdVPes6OzJA4exbuI6imQ&oe=68D45F05') no-repeat center/cover;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
-    z-index: 999;
+    z-index: 9999;
 }
 
 #loginForm {
@@ -230,7 +230,13 @@ h1 {
     padding: 20px;
     border-radius: 15px;
     margin-bottom: 25px;
+    margin-top: 25px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.transaction-list:hover {
+    transition: all 0.5s ease;
+    transform: translateY(-5px);
 }
 
 .transaction-list h3 {
@@ -408,3 +414,4 @@ input::placeholder {
         gap: 15px;
     }
 }
+
