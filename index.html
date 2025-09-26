@@ -77,17 +77,38 @@
                 <span>TeleCash</span>
             </button>
         </div>
-
+        
         <div class="time-range-selector">
             <select id="timeRange">
-                <option value="7days">Last 7 Days</option>
-                <option value="30days">Last 30 Days</option>
                 <option value="today">Today</option>
-                <option value="custom">Custom Range</option>
+                <option value="this-week">This week</option>
+                <option value="this-month">This month</option>
+                <option value="this-year">This year</option>
+                <option value="all-time">All time</option>
             </select>
-            <div id="timeDisplay" class="time-display">
+        </div>
+
+        <div id="timeDisplay" class="time-display">
                 <span id="currentTime"></span>
             </div>
+
+        <div class="summaries">
+            <!-- Overall Summary -->
+        <div id="overallSummary" class="summary-box">
+            <h3>Overall Summary</h3>
+             <p><strong>Balance:</strong> GH₵ <span id="overallBalance">0.00</span></p>
+            <p><strong>Cash In Today:</strong> GH₵ <span id="overallIn">0.00</span> | 
+            <strong>Cash Out Today:</strong> GH₵ <span id="overallOut">0.00</span></p>
+        </div>
+
+            <!-- Per-Network Summary -->
+        <div id="networkSummary" class="summary-box">
+  <h3 id="networkTitle">Network Summary</h3>
+  <p>Balance: <span id="networkBalance"></span></p>
+  <p>Cash In: <span id="networkIn"></span></p>
+  <p>Cash Out: <span id="networkOut"></span></p>
+</div>
+
         </div>
                 <div class="form-container slide-up">
             <h3><i class="fas fa-plus-circle"></i> Add Transaction</h3>
@@ -99,9 +120,14 @@
                         <option value="withdrawal">Withdrawal</option>
                         <option value="airtime">Airtime</option>
                         <option value="transfer">Transfer</option>
-                        <!-- <option value="payment">Payment</option> -->
                     </select>
                 </div>
+                <div id="smsInputContainer" style="display:none;">
+                    <label for="smsContent">Paste Withdrawal SMS:</label>
+                    <textarea id="smsContent" placeholder="Paste the SMS from customer or agent here"></textarea>
+                    <button type="button" id="parseSMSBtn">Parse SMS</button>
+                </div>
+
                 
                 <div class="form-group">
                     <input type="number" id="amount" placeholder="Amount (GH₵)" required step="0.01" min="0.01">
@@ -112,10 +138,6 @@
                     <input type="text" id="clientName" placeholder="Client Name" required>
                     <datalist id="phoneSuggestions"></datalist>
                 </div>
-                
-                <!-- <div class="form-group">
-                    <input type="text" id="recipient" placeholder="Recipient Number (for transfers)" style="display: none;">
-                </div> -->
                 
                 <div class="form-row">
                     <div class="form-group">
