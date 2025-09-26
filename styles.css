@@ -140,6 +140,91 @@ h1 {
     filter: none;
 }
 
+/* Overall Summary - Bigger & More Colorful */
+#overallSummary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    padding: 25px;
+    border-radius: 20px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    text-align: center;
+    transform: scale(1.02);
+    transition: all 0.4s ease;
+}
+
+#overallSummary:hover {
+    transform: scale(1.04) translateY(-4px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+}
+
+#overallSummary h3 {
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    color: #fff;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+#overallSummary p {
+    font-size: 1rem;
+    margin: 8px 0;
+    color: #f9f9f9;
+}
+
+
+/* Per-Network Summary - Smaller but Styled */
+#networkSummary {
+    background: var(--card-bg);
+    padding: 18px;
+    border-radius: 15px;
+    margin: 15px 0;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    transition: all 0.4s ease;
+}
+
+#networkSummary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.3);
+}
+
+#networkSummary h3 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    background: linear-gradient(to right, var(--accent), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#networkSummary p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Balance Styling - Bigger & Colored */
+#overallBalance,
+#networkBalance {
+    font-weight: bold;
+    font-size: 1.6rem;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.balance-positive {
+    color: var(--success);
+}
+
+.balance-negative {
+    color: var(--danger);
+}
+
+/* Cash In/Out - Smaller than Balance */
+#overallIn, #overallOut,
+#networkIn, #networkOut {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+
 /* Time Range Selector */
 .time-range-selector {
     display: flex;
