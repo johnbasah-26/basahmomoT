@@ -405,8 +405,7 @@ document.addEventListener('DOMContentLoaded', function () {
             li.style.alignItems = 'center';
 
             const left = document.createElement('span');
-            left.innerHTML = `<strong>${txn.type}</strong> | GH₵${txn.amount} | ${txn.phone} | ${txn.recipient || txn.clientName || '-'} | ${txn.date} ${txn.time} | ${txn.network}`;
-
+             left.innerHTML = `<strong>${txn.network} ${txn.type}</strong> <br> amount: GH₵${txn.amount} <br> name: ${txn.recipient || txn.clientName || '-'} | number: ${txn.phone}<br> date: ${txn.date} | time: ${txn.time}`;
             const del = document.createElement('button');
             del.textContent = 'Delete';
             del.className = 'delete-txn-btn';
@@ -529,14 +528,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         transactionChart = new Chart(transactionChartEl, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
                     label: `Transactions - ${network || 'All'}`,
                     data: values,
                     fill: false,
-                    borderColor: 'rgb(75,192,192)',
+                    borderColor: '#6a11cb',
+                    backgroundColor: '#6a11cb',
+                    borderWidth: 1,
+                    outerWidth: 1,
+                    borderRadius: 10,
                     tension: 0.1
                 }]
             }
@@ -600,3 +603,4 @@ document.addEventListener('DOMContentLoaded', function () {
     renderChart(getCurrentNetwork());
     
 });
+
